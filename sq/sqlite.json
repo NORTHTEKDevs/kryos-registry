@@ -1,1 +1,1 @@
-{"name": "sqlite", "version": "0.1.0", "dependencies": {}, "checksum": "sha256:d6e5c7222a188b0eb8373463435362f3d57a04b71802ded524dfd3202d4ec63b", "download_url": "https://github.com/NORTHTEKDevs/kryos-registry/releases/download/sqlite-v0.1.0/sqlite-0.1.0.tar.gz"}
+{"name": "sqlite", "version": "0.1.0", "dependencies": {}, "checksum": "sha256:d6e5c7222a188b0eb8373463435362f3d57a04b71802ded524dfd3202d4ec63b", "download_url": "https://raw.githubusercontent.com/NORTHTEKDevs/kryos-registry/master/tarballs/sqlite-0.1.0.tar.gz"}

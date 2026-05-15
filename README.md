@@ -5,8 +5,9 @@ Official registry for the [Kryos](https://github.com/NORTHTEKDevs/kryos-lang) la
 ## Index format
 
 Packages are indexed under `<first-two-chars>/<name>.json` with one newline-delimited
-JSON entry per version. Tarballs are hosted as GitHub Releases on this repo,
-tagged as `<package>-v<version>`.
+JSON entry per version. Tarballs are hosted inside this repo under `tarballs/` and
+served via `raw.githubusercontent.com`. GitHub Release tags also exist as a
+secondary marker (`<package>-v<version>`).
 
 Each entry has the form:
 ```json
@@ -31,8 +32,11 @@ kryos pkg add markdown
 
 ## Adding a package
 
-Open a PR adding a `<prefix2>/<name>.json` entry and create a release with the tarball asset
-tagged as `<package>-v<version>`.
+Open a PR that:
+1. Adds the package source as a `tarballs/<name>-<version>.tar.gz` archive
+2. Adds a `<prefix2>/<name>.json` index entry with a `download_url` pointing at
+   `https://raw.githubusercontent.com/NORTHTEKDevs/kryos-registry/master/tarballs/<name>-<version>.tar.gz`
+3. Tags a release as `<package>-v<version>` (optional but recommended)
 
 ## Layout
 
