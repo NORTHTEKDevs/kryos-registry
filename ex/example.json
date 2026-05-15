@@ -1,0 +1,17 @@
+{
+  "name": "example",
+  "description": "Example package showing the index entry format.",
+  "homepage": "https://github.com/NORTHTEKDevs/kryos-lang",
+  "license": "MIT",
+  "versions": [
+    {
+      "version": "0.1.0",
+      "git": "github:NORTHTEKDevs/kryos-lang",
+      "rev": "HEAD",
+      "checksum": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+      "kryos": ">=1.2.0",
+      "deps": {},
+      "yanked": false
+    }
+  ]
+}

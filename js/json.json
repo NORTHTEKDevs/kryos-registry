@@ -1,0 +1,7 @@
+{
+  "name": "json",
+  "description": "Reserved name — JSON is built into Kryos as a stdlib module (`json`). This registry entry exists so `kryos pkg search json` returns a hit and warns the user.",
+  "homepage": "https://github.com/NORTHTEKDevs/kryos-lang",
+  "license": "MIT",
+  "versions": []
+}
