@@ -1,7 +1,1 @@
-{
-  "name": "json",
-  "description": "Reserved name — JSON is built into Kryos as a stdlib module (`json`). This registry entry exists so `kryos pkg search json` returns a hit and warns the user.",
-  "homepage": "https://github.com/NORTHTEKDevs/kryos-lang",
-  "license": "MIT",
-  "versions": []
-}
+{"name": "json", "version": "0.1.0", "dependencies": {}, "checksum": "sha256:3ff7f89047727839208cb49e5ce3b3bb22d5f5407edeedb90c6dc52ce59aeff7", "download_url": "https://github.com/NORTHTEKDevs/kryos-registry/releases/download/json-v0.1.0/json-0.1.0.tar.gz"}
