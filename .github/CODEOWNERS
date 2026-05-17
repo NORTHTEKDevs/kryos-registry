@@ -1,0 +1,14 @@
+# Path-based publish governance for kryos-registry.
+#
+# At launch, NORTHTEKDevs maintainers own everything. As packages mature
+# and gain stable authors, ownership lines for specific package paths
+# can be added below so that subsequent versions can be auto-approved
+# by the package's established author(s).
+#
+# Format:
+#   <prefix>/<name>.json @github_username[, @another_username]
+#
+# The catch-all keeps everything maintainer-reviewed until per-package
+# overrides land.
+
+*       @NORTHTEKDevs/maintainers

@@ -1,0 +1,119 @@
+name: validate-index
+
+on:
+  pull_request:
+    paths:
+      - '**/*.json'
+      - 'config.toml'
+      - '.github/workflows/validate.yml'
+  push:
+    branches: [master]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate every index file
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          # Validates every <prefix>/<name>.json against the canonical schema:
+          #   {"name", "version", "dependencies", "checksum", "download_url"}
+          # where:
+          #   - prefix dir = first two chars of name, lowercase (or whole name if <2 chars)
+          #   - version is semver
+          #   - dependencies is a JSON object (possibly empty)
+          #   - checksum is sha256:<64-hex>
+          #   - download_url is an https URL
+          import json
+          import re
+          import sys
+          import pathlib
+
+          SEMVER = re.compile(r'^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$')
+          CHECKSUM = re.compile(r'^sha256:[0-9a-f]{64}$')
+          URL = re.compile(r'^https://[^\s]+$')
+
+          REQUIRED = {"name", "version", "dependencies", "checksum", "download_url"}
+          OPTIONAL = {"yanked", "kryos_version", "features",
+                      "description", "license", "homepage", "repository"}
+
+          errors = []
+          root = pathlib.Path(".")
+
+          for path in root.rglob("*.json"):
+              parts = path.parts
+              # Skip anything not in a 2-level <prefix>/<name>.json layout.
+              if parts[0].startswith("."):
+                  continue
+              if parts[0] in ("packages", "tarballs", "node_modules"):
+                  continue
+              if len(parts) != 2:
+                  continue
+              prefix, fname = parts
+              if not fname.endswith(".json"):
+                  continue
+              pkg_name = fname[:-5]
+
+              # Skip documentation-shape files that use the older single-
+              # object-with-versions-array layout. These exist only as
+              # human-readable examples and are not consumed by the client.
+              try:
+                  with path.open() as probe:
+                      head = probe.read()
+                  parsed_whole = json.loads(head)
+                  if isinstance(parsed_whole, dict) and "versions" in parsed_whole:
+                      print(f"::notice file={path}::skipping example file (versions-array layout)")
+                      continue
+              except Exception:
+                  # Not parseable as a single JSON object — fall through to
+                  # the NDJSON validator below.
+                  pass
+              expected_prefix = pkg_name[:2].lower() if len(pkg_name) >= 2 else pkg_name.lower()
+              if prefix != expected_prefix:
+                  errors.append(f"{path}: prefix dir '{prefix}' does not match name '{pkg_name}' (expected '{expected_prefix}')")
+                  continue
+
+              seen_versions = set()
+              with path.open() as f:
+                  for lineno, raw in enumerate(f, 1):
+                      line = raw.strip()
+                      if not line:
+                          continue
+                      try:
+                          obj = json.loads(line)
+                      except json.JSONDecodeError as e:
+                          errors.append(f"{path}:{lineno}: invalid JSON: {e}")
+                          continue
+                      missing = REQUIRED - obj.keys()
+                      if missing:
+                          errors.append(f"{path}:{lineno}: missing required fields: {sorted(missing)}")
+                          continue
+                      if obj["name"] != pkg_name:
+                          errors.append(f"{path}:{lineno}: name field '{obj['name']}' does not match filename '{pkg_name}'")
+                      if not SEMVER.match(str(obj["version"])):
+                          errors.append(f"{path}:{lineno}: invalid semver '{obj['version']}'")
+                      if not isinstance(obj["dependencies"], dict):
+                          errors.append(f"{path}:{lineno}: dependencies must be a JSON object")
+                      if not CHECKSUM.match(str(obj["checksum"])):
+                          errors.append(f"{path}:{lineno}: checksum must match 'sha256:<64-hex>'")
+                      if not URL.match(str(obj["download_url"])):
+                          errors.append(f"{path}:{lineno}: download_url must be an HTTPS URL")
+                      version_key = obj["version"]
+                      if version_key in seen_versions:
+                          errors.append(f"{path}:{lineno}: duplicate version '{version_key}' (versions must be immutable + unique)")
+                      seen_versions.add(version_key)
+                      unknown = set(obj.keys()) - REQUIRED - OPTIONAL
+                      if unknown:
+                          # Surface unknown keys as warnings — clients ignore them
+                          # for forward compatibility, but it's almost always a typo.
+                          print(f"::notice file={path},line={lineno}::unknown field(s) tolerated: {sorted(unknown)}")
+
+          if errors:
+              for e in errors:
+                  print("ERROR:", e, file=sys.stderr)
+              sys.exit(1)
+          print("All index files validated.")
+          PY

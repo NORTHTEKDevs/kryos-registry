@@ -1,0 +1,6 @@
+# Registry-wide configuration. Clients fetch this on `kryos pkg sync` to learn
+# the schema version and the conventional location of tarball assets.
+
+schema_version = 1
+index_url      = "https://github.com/NORTHTEKDevs/kryos-registry"
+tarball_base   = "https://raw.githubusercontent.com/NORTHTEKDevs/kryos-registry/master/tarballs"
