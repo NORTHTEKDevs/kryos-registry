@@ -1,20 +1,24 @@
 // kryos-uuid-pkg — ergonomic v4 UUID helpers.
 
-use std::crypto::{uuid_v4, uuid_parse}
+use std::crypto::{uuid_v4}
 
 /// Generate a fresh v4 UUID as a canonical hyphenated string.
 pub fn v4() -> str {
     return uuid_v4()
 }
 
-/// Validate that `s` is a syntactically valid hyphenated UUID. Returns true
-/// only if `s` parses cleanly via std::uuid::uuid_parse.
+/// Validate that `s` is a syntactically valid hyphenated UUID.
+/// Checks length (36) and that hyphens are in the correct positions.
 pub fn is_valid(s: str) -> bool {
     if len(s) != 36 {
         return false
     }
-    let bytes = uuid_parse(s)
-    return len(bytes) == 16
+    // Hyphenated UUID: 8-4-4-4-12 = xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+    if substr(s, 8, 9) != "-" { return false }
+    if substr(s, 13, 14) != "-" { return false }
+    if substr(s, 18, 19) != "-" { return false }
+    if substr(s, 23, 24) != "-" { return false }
+    return true
 }
 
 /// Generate `n` UUIDs as an array.
